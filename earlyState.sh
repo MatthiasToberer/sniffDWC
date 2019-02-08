@@ -8,7 +8,7 @@ fi
 
 clear
 printf "%s" "send M999 (reset) to duet ...\n\n"
-URL_RESPONSE=`curl "http://${1}/rr_gcode?gcode=M999"`    # https://reprap.org/wiki/G-code#M999:_Restart_after_being_stopped_by_error
+URL_RESPONSE=`curl --connect-timeout 1 "http://${1}/rr_gcode?gcode=M999"`    # https://reprap.org/wiki/G-code#M999:_Restart_after_being_stopped_by_error
 printf "$CURL_RESPONSE\n\n"
 
 # check if we have connection
@@ -23,7 +23,7 @@ done
 for i in 1 2 3; 
   do
     printf "rr_status=${i}\n"
-    CURL_RESPONSE=`curl "http://${1}/rr_status?type=$i"`
+    CURL_RESPONSE=`curl --connect-timeout 1 "http://${1}/rr_status?type=$i"`
     printf "$CURL_RESPONSE \n\n"
 done
 
