@@ -8,25 +8,23 @@ fi
 
 clear
 printf "%s" "send M999 (reset) to duet ...\n\n"
-URL_RESPONSE=`curl --connect-timeout 1 "http://${1}/rr_gcode?gcode=M999"`    # https://reprap.org/wiki/G-code#M999:_Restart_after_being_stopped_by_error
+URL_RESPONSE=$(curl -s --connect-timeout 1 "http://${1}/rr_gcode?gcode=M999")    # https://reprap.org/wiki/G-code#M999:_Restart_after_being_stopped_by_error
 printf "$CURL_RESPONSE\n\n"
 
-# check if we have connection
-printf "waiting for response ...\n\n"
-while ! ping -c1 $1 &>/dev/null
-do
-  #echo "waiting for duet ob $1 ... \n"
-  printf "%c" "."
+responses=0
+while [[ $responses -lt 18 ]]; do
+	for i in 1 2 3; do
+		CURL_RESPONSE=$(curl -s -m 1 "http://${1}/rr_status?type=$i")
+		if [[ $(echo $CURL_RESPONSE | wc -c ) -gt 2 ]]; then
+			printf "============================== \t rr_status=${i} \t ====================================\n"
+			printf "$CURL_RESPONSE \n\n"
+			responses=$((responses+1))
+		fi
+		sleep .1
+	done
+	if [[ $(echo $CURL_RESPONSE | wc -c ) -gt 2 ]]; then
+		printf "\n\n============================== \t ==================== \t ====================================\n\n\n"
+	fi
 done
-
-# fire up some status checks
-for i in 1 2 3; 
-  do
-    printf "rr_status=${i}\n"
-    CURL_RESPONSE=`curl --connect-timeout 1 "http://${1}/rr_status?type=$i"`
-    printf "$CURL_RESPONSE \n\n"
-done
-
-
 
 printf "\n%s\n"  "duet is back..."
