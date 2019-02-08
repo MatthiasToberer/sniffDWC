@@ -7,22 +7,24 @@ if [ $# -eq 0 ]   # check if we have a target
 fi
 
 clear
-printf "%s" "send M999 (reset) to duet ..."
-URL_RESPONSE=`curl 'http://$1/rr_gcode?gcode=M999'`    # https://reprap.org/wiki/G-code#M999:_Restart_after_being_stopped_by_error
-echo "$CURL_RESPONSE \n\n"
+printf "%s" "send M999 (reset) to duet ...\n\n"
+URL_RESPONSE=`curl "http://${1}/rr_gcode?gcode=M999"`    # https://reprap.org/wiki/G-code#M999:_Restart_after_being_stopped_by_error
+printf "$CURL_RESPONSE\n\n"
 
-printf "%s" "waiting for response ...\n"
+# check if we have connection
+printf "waiting for response ...\n\n"
 while ! ping -c1 $1 &>/dev/null
 do
   #echo "waiting for duet ob $1 ... \n"
   printf "%c" "."
 done
 
+# fire up some status checks
 for i in 1 2 3; 
   do
+    printf "rr_status=${i}\n"
     CURL_RESPONSE=`curl "http://${1}/rr_status?type=$i"`
-    echo "rr_status=$i\n"
-    echo "$CURL_RESPONSE \n\n"
+    printf "$CURL_RESPONSE \n\n"
 done
 
 
